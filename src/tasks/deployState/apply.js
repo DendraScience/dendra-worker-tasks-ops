@@ -17,7 +17,7 @@ module.exports = {
   },
 
   async execute (m, { logger }) {
-    const spec = m.specsToApply[0]
+    const spec = Object.assign({}, m.specsToApply[0])
     let doc
 
     logger.info('Getting contents to apply', { spec })

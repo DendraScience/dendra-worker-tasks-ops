@@ -9,6 +9,8 @@ async function processItem({ data, dataObj, msgSeq }, { logger, specs, specsToAp
     Find matching specs to apply based on commits.
    */
 
+  logger.info('Processing file specs', { dataObj, specs, msgSeq, subSubject });
+
   const matchedSpecs = specs.filter(spec => {
     return dataObj.ref === spec.ref && dataObj.repository && dataObj.repository.name === spec.repo && dataObj.repository.owner && dataObj.repository.owner.name === spec.owner && dataObj.commits && dataObj.commits.find(commit => {
       return commit.added && commit.added.includes(spec.path) || commit.modified && commit.modified.includes(spec.path);
