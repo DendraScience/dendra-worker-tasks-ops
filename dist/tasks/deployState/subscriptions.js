@@ -39,7 +39,7 @@ function handleMessage(msg) {
 
   try {
     const data = msg.getData();
-    const dataObj = JSON.parse(msg.getData());
+    const dataObj = JSON.parse(data);
 
     processItem({ data, dataObj, msgSeq }, this).then(() => msg.ack()).catch(err => {
       logger.error('Message processing error', { msgSeq, subSubject, err, dataObj });

@@ -88,7 +88,7 @@ describe('deployState tasks', function () {
   })
 
   it('should import', function () {
-    tasks = require('../../dist').deployState
+    tasks = require('../../../dist').deployState
 
     expect(tasks).to.have.property('sources')
   })
@@ -108,7 +108,7 @@ describe('deployState tasks', function () {
     model.scratch = {}
 
     return machine.clear().start().then(success => {
-      /* eslint-disable no-unused-expressions */
+      /* eslint-disable-next-line no-unused-expressions */
       expect(success).to.be.true
 
       // Verify task state
