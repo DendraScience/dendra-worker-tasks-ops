@@ -9,7 +9,12 @@ async function processItem (
     Find matching specs to apply based on commits.
    */
 
-  logger.info('Processing file specs', { dataObj, specs, msgSeq, subSubject })
+  logger.info('Processing item', {
+    dataObj: JSON.stringify(dataObj),
+    specs: JSON.stringify(specs),
+    msgSeq,
+    subSubject
+  })
 
   const matchedSpecs = specs.filter(spec => {
     return (dataObj.ref === spec.ref) &&
