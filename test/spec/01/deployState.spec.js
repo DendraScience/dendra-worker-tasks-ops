@@ -36,20 +36,24 @@ describe('deployState tasks', function () {
   const eventSubject = 'github.webhook'
 
   const pushEvent = {
-    ref: 'refs/heads/master',
-    commits: [{
-      added: [
-      ],
-      removed: [
-      ],
-      modified: [
-        'deploy/edge/v1/core/agg/build.json'
-      ]
-    }],
-    repository: {
-      name: 'dendra-worker-state',
-      owner: {
-        name: 'DendraScience'
+    id: '0cac414a-0963-11e9-85aa-b20c3938340a',
+    name: 'push',
+    payload: {
+      ref: 'refs/heads/master',
+      commits: [{
+        added: [
+        ],
+        removed: [
+        ],
+        modified: [
+          'deploy/edge/v1/core/agg/build.json'
+        ]
+      }],
+      repository: {
+        name: 'dendra-worker-state',
+        owner: {
+          name: 'DendraScience'
+        }
       }
     }
   }

@@ -9,27 +9,27 @@ async function processItem (
     Find matching specs to apply based on commits.
    */
 
-  logger.info('Processing item', {
-    dataObj: JSON.stringify(dataObj),
-    specs: JSON.stringify(specs),
-    msgSeq,
-    subSubject
-  })
+  if ((dataObj.name === 'push') &&
+      dataObj.payload &&
+      dataObj.payload.repository &&
+      dataObj.payload.repository.owner &&
+      dataObj.payload.commits) {
+    logger.info('Processing push event', { id: dataObj.id, msgSeq, subSubject })
 
-  const matchedSpecs = specs.filter(spec => {
-    return (dataObj.ref === spec.ref) &&
-      dataObj.repository && (dataObj.repository.name === spec.repo) &&
-      dataObj.repository.owner && (dataObj.repository.owner.name === spec.owner) &&
-      dataObj.commits &&
-      dataObj.commits.find(commit => {
-        return (commit.added && commit.added.includes(spec.path)) ||
-          (commit.modified && commit.modified.includes(spec.path))
-      })
-  })
+    const matchedSpecs = specs.filter(spec => {
+      return (dataObj.payload.ref === spec.ref) &&
+        (dataObj.payload.repository.name === spec.repo) &&
+        (dataObj.payload.repository.owner.name === spec.owner) &&
+        (dataObj.payload.commits.find(commit => {
+          return (commit.added && commit.added.includes(spec.path)) ||
+            (commit.modified && commit.modified.includes(spec.path))
+        }))
+    })
 
-  specsToApply.push(...matchedSpecs)
+    logger.info('Matched file specs', { matchedSpecs, msgSeq, subSubject })
 
-  logger.info('Matched file specs', { matchedSpecs, msgSeq, subSubject })
+    specsToApply.push(...matchedSpecs)
+  }
 }
 
 function handleMessage (msg) {

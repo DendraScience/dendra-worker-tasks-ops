@@ -17,13 +17,13 @@ module.exports = {
   },
 
   async execute (m, { logger }) {
-    const spec = Object.assign({}, m.specsToApply[0])
+    const spec = m.specsToApply[0]
     let doc
 
     logger.info('Getting contents to apply', { spec })
 
     try {
-      const contents = await octokit.repos.getContents(spec)
+      const contents = await octokit.repos.getContents(Object.assign({}, spec))
       const { sha } = contents.data
 
       logger.info('Getting blob to apply', { sha, spec })
