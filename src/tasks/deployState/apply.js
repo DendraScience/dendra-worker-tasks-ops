@@ -3,8 +3,10 @@
  */
 
 // For API docs, see https://octokit.github.io/rest.js
-const octokit = require('@octokit/rest')()
+const Octokit = require('@octokit/rest')
 const path = require('path')
+
+let octokit
 
 module.exports = {
   clear (m) {
@@ -17,8 +19,24 @@ module.exports = {
   },
 
   async execute (m, { logger }) {
+    const cfg = m.$app.get('clients').octokit
     const spec = m.specsToApply[0]
     let doc
+
+    if (!octokit) {
+      const opts = {
+        userAgent: 'DendraScience/dendra-worker-tasks-ops'
+      }
+
+      if (cfg && cfg.auth && cfg.auth.token) {
+        logger.info('Configuring octokit with auth token')
+        opts.auth = `token ${cfg.auth.token}`
+      } else {
+        logger.info('Configuring octokit without auth!')
+      }
+
+      octokit = new Octokit(opts)
+    }
 
     logger.info('Getting contents to apply', { spec })
 

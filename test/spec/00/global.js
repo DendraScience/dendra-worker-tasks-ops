@@ -16,6 +16,11 @@ app.set('agents', {
 })
 
 app.set('clients', {
+  octokit: {
+    auth: {
+      token: process.env.GITHUB_AUTH_TOKEN
+    }
+  },
   stan: {
     client: 'test-ops-{key}',
     cluster: 'test-cluster',
