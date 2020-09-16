@@ -1,5 +1,5 @@
 const chai = require('chai')
-const feathers = require('feathers')
+const feathers = require('@feathersjs/feathers')
 const memory = require('feathers-memory')
 const app = feathers()
 
@@ -11,8 +11,7 @@ tm.configure({
 app.logger = console
 
 app.set('agents', {
-  build: {
-  }
+  build: {}
 })
 
 app.set('clients', {
@@ -31,15 +30,17 @@ app.set('clients', {
 })
 
 // Create an in-memory Feathers service for state docs
-app.use('/state/docs', memory({
-  id: '_id',
-  paginate: {
-    default: 200,
-    max: 2000
-  },
-  store: {
-  }
-}))
+app.use(
+  '/state/docs',
+  memory({
+    id: '_id',
+    paginate: {
+      default: 200,
+      max: 2000
+    },
+    store: {}
+  })
+)
 
 global.assert = chai.assert
 global.expect = chai.expect

@@ -2,28 +2,35 @@
  * Subscribe to subjects after connected. Add an event listener for messages.
  */
 
-async function processItem (
+async function processItem(
   { data, dataObj, msgSeq },
-  { logger, specs, specsToApply, subSubject }) {
+  { logger, specs, specsToApply, subSubject }
+) {
   /*
     Find matching specs to apply based on commits.
    */
 
-  if ((dataObj.name === 'push') &&
-      dataObj.payload &&
-      dataObj.payload.repository &&
-      dataObj.payload.repository.owner &&
-      dataObj.payload.commits) {
+  if (
+    dataObj.name === 'push' &&
+    dataObj.payload &&
+    dataObj.payload.repository &&
+    dataObj.payload.repository.owner &&
+    dataObj.payload.commits
+  ) {
     logger.info('Processing push event', { id: dataObj.id, msgSeq, subSubject })
 
     const matchedSpecs = specs.filter(spec => {
-      return (dataObj.payload.ref === spec.ref) &&
-        (dataObj.payload.repository.name === spec.repo) &&
-        (dataObj.payload.repository.owner.name === spec.owner) &&
-        (dataObj.payload.commits.find(commit => {
-          return (commit.added && commit.added.includes(spec.path)) ||
+      return (
+        dataObj.payload.ref === spec.ref &&
+        dataObj.payload.repository.name === spec.repo &&
+        dataObj.payload.repository.owner.name === spec.owner &&
+        dataObj.payload.commits.find(commit => {
+          return (
+            (commit.added && commit.added.includes(spec.path)) ||
             (commit.modified && commit.modified.includes(spec.path))
-        }))
+          )
+        })
+      )
     })
 
     logger.info('Matched file specs', { matchedSpecs, msgSeq, subSubject })
@@ -32,7 +39,7 @@ async function processItem (
   }
 }
 
-function handleMessage (msg) {
+function handleMessage(msg) {
   const { logger, m, subSubject } = this
 
   if (!msg) {
@@ -53,23 +60,33 @@ function handleMessage (msg) {
     const data = msg.getData()
     const dataObj = JSON.parse(data)
 
-    processItem({ data, dataObj, msgSeq }, this).then(() => msg.ack()).catch(err => {
-      logger.error('Message processing error', { msgSeq, subSubject, err, dataObj })
-    })
+    processItem({ data, dataObj, msgSeq }, this)
+      .then(() => msg.ack())
+      .catch(err => {
+        logger.error('Message processing error', {
+          msgSeq,
+          subSubject,
+          err,
+          dataObj
+        })
+      })
   } catch (err) {
     logger.error('Message error', { msgSeq, subSubject, err })
   }
 }
 
 module.exports = {
-  guard (m) {
-    return !m.subscriptionsError &&
-      m.private.stan && m.stanConnected &&
-      (m.subscriptionsTs !== m.versionTs) &&
+  guard(m) {
+    return (
+      !m.subscriptionsError &&
+      m.private.stan &&
+      m.stanConnected &&
+      m.subscriptionsTs !== m.versionTs &&
       !m.private.subscriptions
+    )
   },
 
-  execute (m, { logger }) {
+  execute(m, { logger }) {
     const { specsToApply } = m
     const { stan } = m.private
     const { specs } = m.props
@@ -77,10 +94,7 @@ module.exports = {
 
     m.sourceKeys.forEach(sourceKey => {
       const source = m.sources[sourceKey]
-      const {
-        sub_options: subOptions,
-        sub_to_subject: subSubject
-      } = source
+      const { sub_options: subOptions, sub_to_subject: subSubject } = source
 
       try {
         const opts = stan.subscriptionOptions()
@@ -90,20 +104,28 @@ module.exports = {
         opts.setMaxInFlight(1)
 
         if (subOptions) {
-          if (typeof subOptions.ack_wait === 'number') opts.setAckWait(subOptions.ack_wait)
-          if (typeof subOptions.durable_name === 'string') opts.setDurableName(subOptions.durable_name)
+          if (typeof subOptions.ack_wait === 'number')
+            opts.setAckWait(subOptions.ack_wait)
+          if (typeof subOptions.durable_name === 'string')
+            opts.setDurableName(subOptions.durable_name)
         }
 
-        const sub = (typeof queueGroup === 'string') ? stan.subscribe(subSubject, opts) : stan.subscribe(subSubject, opts)
+        const sub =
+          typeof queueGroup === 'string'
+            ? stan.subscribe(subSubject, opts)
+            : stan.subscribe(subSubject, opts)
 
-        sub.on('message', handleMessage.bind({
-          logger,
-          m,
-          specs,
-          specsToApply,
-          stan,
-          subSubject
-        }))
+        sub.on(
+          'message',
+          handleMessage.bind({
+            logger,
+            m,
+            specs,
+            specsToApply,
+            stan,
+            subSubject
+          })
+        )
 
         subs.push(sub)
       } catch (err) {
@@ -114,7 +136,7 @@ module.exports = {
     return subs
   },
 
-  assign (m, res, { logger }) {
+  assign(m, res, { logger }) {
     m.private.subscriptions = res
     m.subscriptionsTs = m.versionTs
 

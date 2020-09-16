@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 module.exports = {
   apply: require('./tasks/deployState/apply'),

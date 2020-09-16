@@ -3,22 +3,21 @@
  */
 
 // For API docs, see https://octokit.github.io/rest.js
-const Octokit = require('@octokit/rest')
+const { Octokit } = require('@octokit/rest')
 const path = require('path')
 
 let octokit
 
 module.exports = {
-  clear (m) {
+  clear(m) {
     if (!m.specsToApply && m.props.specs) m.specsToApply = m.props.specs.slice()
   },
 
-  guard (m) {
-    return !m.applyError &&
-      m.specsToApply && (m.specsToApply.length > 0)
+  guard(m) {
+    return !m.applyError && m.specsToApply && m.specsToApply.length > 0
   },
 
-  async execute (m, { logger }) {
+  async execute(m, { logger }) {
     const cfg = m.$app.get('clients').octokit
     const spec = m.specsToApply[0]
     let doc
@@ -41,7 +40,7 @@ module.exports = {
     logger.info('Getting contents to apply', { spec })
 
     try {
-      const contents = await octokit.repos.getContents(Object.assign({}, spec))
+      const contents = await octokit.repos.getContent(Object.assign({}, spec))
       const { sha } = contents.data
 
       logger.info('Getting blob to apply', { sha, spec })
@@ -67,9 +66,15 @@ module.exports = {
       logger.info(`Updating state doc '${defaultDocId}'`)
 
       try {
-        doc = await docService.update(defaultDocId, Object.assign({
-          _id: defaultDocId
-        }, data))
+        doc = await docService.update(
+          defaultDocId,
+          Object.assign(
+            {
+              _id: defaultDocId
+            },
+            data
+          )
+        )
       } catch (err) {
         if (err.code !== 404) throw err
 
@@ -79,9 +84,14 @@ module.exports = {
       if (!doc) {
         logger.info(`Creating state doc '${defaultDocId}'`)
 
-        doc = await docService.create(Object.assign({
-          _id: defaultDocId
-        }, data))
+        doc = await docService.create(
+          Object.assign(
+            {
+              _id: defaultDocId
+            },
+            data
+          )
+        )
       }
 
       logger.info(`Removing state doc '${currentDocId}'`)
@@ -101,7 +111,7 @@ module.exports = {
     return doc
   },
 
-  assign (m, res, { logger }) {
+  assign(m, res, { logger }) {
     const spec = m.specsToApply.shift()
 
     logger.info('State applied', { _id: res._id, spec })

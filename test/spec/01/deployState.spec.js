@@ -19,12 +19,14 @@ describe('deployState tasks', function () {
           sub_to_subject: 'github.webhook'
         }
       ],
-      specs: [{
-        owner: 'DendraScience',
-        repo: 'dendra-worker-state',
-        path: 'deploy/edge/v1/core/agg/build.json',
-        ref: 'refs/heads/master'
-      }]
+      specs: [
+        {
+          owner: 'DendraScience',
+          repo: 'dendra-worker-state',
+          path: 'deploy/edge/v1/core/agg/build.json',
+          ref: 'refs/heads/master'
+        }
+      ]
     },
     state: {
       _id: 'taskMachine-deployState-current',
@@ -40,15 +42,13 @@ describe('deployState tasks', function () {
     name: 'push',
     payload: {
       ref: 'refs/heads/master',
-      commits: [{
-        added: [
-        ],
-        removed: [
-        ],
-        modified: [
-          'deploy/edge/v1/core/agg/build.json'
-        ]
-      }],
+      commits: [
+        {
+          added: [],
+          removed: [],
+          modified: ['deploy/edge/v1/core/agg/build.json']
+        }
+      ],
       repository: {
         name: 'dendra-worker-state',
         owner: {
@@ -82,12 +82,14 @@ describe('deployState tasks', function () {
 
   after(function () {
     return Promise.all([
-      model.private.stan ? new Promise((resolve, reject) => {
-        model.private.stan.removeAllListeners()
-        model.private.stan.once('close', resolve)
-        model.private.stan.once('error', reject)
-        model.private.stan.close()
-      }) : Promise.resolve()
+      model.private.stan
+        ? new Promise((resolve, reject) => {
+            model.private.stan.removeAllListeners()
+            model.private.stan.once('close', resolve)
+            model.private.stan.once('error', reject)
+            model.private.stan.close()
+          })
+        : Promise.resolve()
     ])
   })
 
@@ -111,35 +113,46 @@ describe('deployState tasks', function () {
   it('should run', function () {
     model.scratch = {}
 
-    return machine.clear().start().then(success => {
-      /* eslint-disable-next-line no-unused-expressions */
-      expect(success).to.be.true
+    return machine
+      .clear()
+      .start()
+      .then(success => {
+        /* eslint-disable-next-line no-unused-expressions */
+        expect(success).to.be.true
 
-      // Verify task state
-      expect(model).to.have.property('applyReady', true)
-      expect(model).to.have.property('sourcesReady', true)
-      expect(model).to.have.property('stanCheckReady', false)
-      expect(model).to.have.property('stanCloseReady', false)
-      expect(model).to.have.property('stanReady', true)
-      expect(model).to.have.property('subscriptionsReady', true)
-      expect(model).to.have.property('versionTsReady', false)
+        // Verify task state
+        expect(model).to.have.property('applyReady', true)
+        expect(model).to.have.property('sourcesReady', true)
+        expect(model).to.have.property('stanCheckReady', false)
+        expect(model).to.have.property('stanCloseReady', false)
+        expect(model).to.have.property('stanReady', true)
+        expect(model).to.have.property('subscriptionsReady', true)
+        expect(model).to.have.property('versionTsReady', false)
 
-      // Check for defaults
-      expect(model).to.have.nested.property('sources.github_webhook.some_default', 'default')
-    })
+        // Check for defaults
+        expect(model).to.have.nested.property(
+          'sources.github_webhook.some_default',
+          'default'
+        )
+      })
   })
 
   it('should get default state', function () {
-    return main.app.service('/state/docs').get('agent-build-default').then(doc => {
-      expect(doc).to.have.property('_id', 'agent-build-default')
-    })
+    return main.app
+      .service('/state/docs')
+      .get('agent-build-default')
+      .then(doc => {
+        expect(doc).to.have.property('_id', 'agent-build-default')
+      })
   })
 
   it('should process push event', function () {
     const msgStr = JSON.stringify(pushEvent)
 
     return new Promise((resolve, reject) => {
-      model.private.stan.publish(eventSubject, msgStr, (err, guid) => err ? reject(err) : resolve(guid))
+      model.private.stan.publish(eventSubject, msgStr, (err, guid) =>
+        err ? reject(err) : resolve(guid)
+      )
     })
   })
 
@@ -154,21 +167,24 @@ describe('deployState tasks', function () {
   it('should apply', function () {
     model.scratch = {}
 
-    return machine.clear().start().then(success => {
-      /* eslint-disable no-unused-expressions */
-      expect(success).to.be.true
+    return machine
+      .clear()
+      .start()
+      .then(success => {
+        /* eslint-disable no-unused-expressions */
+        expect(success).to.be.true
 
-      // Verify task state
-      expect(model).to.have.property('applyReady', true)
-      expect(model).to.have.property('sourcesReady', false)
-      expect(model).to.have.property('stanCheckReady', false)
-      expect(model).to.have.property('stanCloseReady', false)
-      expect(model).to.have.property('stanReady', false)
-      expect(model).to.have.property('subscriptionsReady', false)
-      expect(model).to.have.property('versionTsReady', false)
+        // Verify task state
+        expect(model).to.have.property('applyReady', true)
+        expect(model).to.have.property('sourcesReady', false)
+        expect(model).to.have.property('stanCheckReady', false)
+        expect(model).to.have.property('stanCloseReady', false)
+        expect(model).to.have.property('stanReady', false)
+        expect(model).to.have.property('subscriptionsReady', false)
+        expect(model).to.have.property('versionTsReady', false)
 
-      // Verify applied state
-      expect(model).to.have.property('specsToApply').lengthOf(0)
-    })
+        // Verify applied state
+        expect(model).to.have.property('specsToApply').lengthOf(0)
+      })
   })
 })

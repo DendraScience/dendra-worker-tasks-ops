@@ -2,10 +2,9 @@
 
 Dendra Worker tasks for configuration and deployment.
 
-
 ## Instructions
 
-1. Be sure you have Node version 8.11.3. If you’re using nvm, you may need to `nvm use 8.11.3`.
+1. Be sure you have Node version 12.14.x. If you’re using nvm, you may need to `nvm use 12.14`.
 
 2. Clone this repo.
 
